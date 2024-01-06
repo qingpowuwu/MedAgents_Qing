@@ -6,7 +6,7 @@ from wrapt_timeout_decorator import timeout
 openai.api_type = "azure"
 openai.api_base = ""
 openai.api_version = ""
-openai.api_key = ""
+openai.api_key = "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"
 
 
 @timeout(200) # 200 seconds timeout
@@ -80,21 +80,9 @@ class api_handler:
         self.model = model
 
         if self.model == 'instructgpt':
-            self.engine = 'text-davinci-002'
-        elif self.model == 'instructgpt-gen':
-            self.engine = 'text-davinci-002'
-        elif self.model == 'newinstructgpt':
             self.engine = 'text-davinci-003'
-        elif self.model == 'oldinstructgpt':
-            self.engine = 'text-davinci-001'
-        elif self.model == 'gpt3':
-            self.engine = 'davinci'
         elif self.model == 'codex':
             self.engine = 'code-davinci-002'
-        elif self.model == 'gpt3-edit':
-            self.engine = 'text-davinci-edit-001'
-        elif self.model == 'codex-edit':
-            self.engine = 'code-davinci-edit-001'
         elif self.model == 'chatgpt':
             self.engine = 'gpt-35-turbo-16k'
         elif self.model == 'gpt4':
@@ -102,8 +90,31 @@ class api_handler:
         else:
             raise NotImplementedError
 
-    def get_output_multiagent(self, system_role, user_input, max_tokens, temperature=0,
-                    frequency_penalty=0, presence_penalty=0, stop=None):
+    def get_output_multiagent(self, 
+                              system_role, user_input, 
+                              max_tokens, 
+                              temperature=0,
+                              frequency_penalty=0, 
+                              presence_penalty=0, 
+                              stop=None):
+        """_summary_: 
+
+        Args:
+            - system_role: (_type_)       : _description_
+            - user_input : (_type_)       : _description_
+            - max_tokens : (_type_)       : _description_
+            - temperature: (int, optional): _description_.
+                                                        [Defaults to 0]
+            - frequency_penalty: (int, optional): _description_.
+                                                        [Defaults to 0]
+            - presence_penalty: (int, optional): _description_.
+                                                        [Defaults to 0]
+            - stop: (_type_, optional): _description_.
+                                                        [Defaults to None]
+
+        Returns:
+            - : (_type_): _description_
+        """
         max_attempts = 3
         for attempt in range(max_attempts):
             try:
@@ -118,9 +129,18 @@ class api_handler:
                     return "ERROR."
 
 
-    def get_output(self, input_text, max_tokens, temperature=0,
-                   suffix=None, stop=None, do_tunc=False, echo=False, ban_pronoun=False,
-                   frequency_penalty=0, presence_penalty=0, return_prob=False):
+    def get_output(self, 
+                   input_text, 
+                   max_tokens, 
+                   temperature=0,
+                   suffix=None, 
+                   stop=None, 
+                   do_tunc=False, 
+                   echo=False, 
+                   ban_pronoun=False,
+                   frequency_penalty=0, 
+                   presence_penalty=0, 
+                   return_prob=False):
         try:
             response = generate_response(self.engine, temperature, max_tokens, frequency_penalty, presence_penalty, stop, input_text)
         except (TimeoutError, openai.error.Timeout, Exception):    

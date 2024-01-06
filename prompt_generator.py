@@ -4,6 +4,8 @@ NUM_OD = 2
 
 # question domains
 def get_question_domains_prompt(question):
+    """_summary_: 生成 prompt => 引导 llm 来确定一个医学问题属于医学的哪 5个子领域。
+    """
     question_domain_format = "Medical Field: " + " | ".join(["Field" + str(i) for i in range(NUM_QD)])
     question_classifier = "You are a medical expert who specializes in categorizing a specific medical scenario into specific areas of medicine."
     prompt_get_question_domain = f"You need to complete the following steps:" \
@@ -13,8 +15,17 @@ def get_question_domains_prompt(question):
     return question_classifier, prompt_get_question_domain
 
 
-
+# Generates prompt for analyzing a medical scenario from the perspective of a specific domain
 def get_question_analysis_prompt(question, question_domain):
+    """_summary_: 生成 prompt => 引导 llm 从 domain expert 的角度分析一个具体的医学问题。
+
+    Args:
+        - question: (_type_): _description_
+        - question_domain: (_type_): _description_
+
+    Returns:
+        - : (_type_): _description_
+    """
     question_analyzer = f"You are a medical expert in the domain of {question_domain}. " \
         f"From your area of specialization, you will scrutinize and diagnose the symptoms presented by patients in specific medical scenarios."
     prompt_get_question_analysis = f"Please meticulously examine the medical scenario outlined in this question: '''{question}'''." \
@@ -24,6 +35,15 @@ def get_question_analysis_prompt(question, question_domain):
     return question_analyzer, prompt_get_question_analysis
 
 def get_options_domains_prompt(question, options):
+    """_summary_: 生成 prompt => 引导 llm 来确定一个医学问题中和 options 最相关的 2个子领域。
+
+    Args:
+        - question: (_type_): _description_
+        - options: (_type_): _description_
+
+    Returns:
+        - : (_type_): _description_
+    """
     options_domain_format =  "Medical Field: " + " | ".join(["Field" + str(i) for i in range(NUM_OD)])
     options_classifier = f"As a medical expert, you possess the ability to discern the two most relevant fields of expertise needed to address a multiple-choice question encapsulating a specific medical context."
     prompt_get_options_domain = f"You need to complete the following steps:" \
@@ -35,6 +55,17 @@ def get_options_domains_prompt(question, options):
 
 
 def get_options_analysis_prompt(question, options, op_domain, question_analysis):
+    """_summary_: 生成 prompt => 引导 llm 来从 domain expert 的角度分析一个医学问题中的 options。
+
+    Args:
+        - question: (_type_): _description_
+        - options: (_type_): _description_
+        - op_domain: (_type_): _description_
+        - question_analysis: (_type_): _description_
+
+    Returns:
+        - : (_type_): _description_
+    """
     option_analyzer = f"You are a medical expert specialized in the {op_domain} domain. " \
                 f"You are adept at comprehending the nexus between questions and choices in multiple-choice exams and determining their validity. " \
                 f"Your task, in particular, is to analyze individual options with your expert medical knowledge and evaluate their relevancy and correctness."
@@ -51,6 +82,17 @@ def get_options_analysis_prompt(question, options, op_domain, question_analysis)
 
 
 def get_final_answer_prompt_analonly(question, options, question_analyses, option_analyses):
+    """_summary_: 生成 prompt => 引导 llm 基于 question analyses 和 option analyses 来确定最终的答案。
+
+    Args:
+        - question: (_type_): _description_
+        - options: (_type_): _description_
+        - question_analyses: (_type_): _description_
+        - option_analyses: (_type_): _description_
+
+    Returns:
+        - : (_type_): _description_
+    """
     prompt = f"Question: {question} \nOptions: {options} \n" \
         f"Answer: Let's work this out in a step by step way to be sure we have the right answer. \n" \
         f"Step 1: Decode the question properly. We have a team of experts who have done a detailed analysis of this question. " \
@@ -76,6 +118,14 @@ def get_final_answer_prompt_analonly(question, options, question_analyses, optio
     return prompt
 
 def get_final_answer_prompt_wsyn(syn_report):
+    """_summary_: 生成 prompt => 引导 llm 基于 synthesized report 来确定最终的答案。 
+
+    Args:
+        - syn_report: (_type_): _description_
+
+    Returns:
+        - : (_type_): _description_
+    """
     prompt = f"Here is a synthesized report: {syn_report} \n" \
         f"Based on the above report, select the optimal choice to answer the question. \n" \
         f"Points to note: \n" \
@@ -87,12 +137,30 @@ def get_final_answer_prompt_wsyn(syn_report):
 
 
 def get_direct_prompt(question, options):
+    """_summary_: 生成 prompt => 引导 llm 提供直接回答问题的格式。
+
+    Args:
+        - question: (_type_): _description_
+        - options: (_type_): _description_
+
+    Returns:
+        - : (_type_): _description_
+    """
     prompt = f"Question: {question} \n" \
         f"Options: {options} \n" \
         f"Please respond only with the selected option's letter, like A, B, C, D, or E, using the following format: '''Option: [Selected Option's Letter]'''."
     return prompt
 
 def get_cot_prompt(question, options):
+    """_summary_: 生成 prompt => 引导 llm 提供 (CoT) step-by-step thoughts 和 最终答案。
+
+    Args:
+        - question: (_type_): _description_
+        - options: (_type_): _description_
+
+    Returns:
+        - : (_type_): _description_
+    """
     cot_format = f"Thought: [the step-by-step thoughts] \n" \
                 f"Answer: [Selected Option's Letter (like A, B, C, D, or E)] \n"
     prompt = f"Question: {question} \n" \
@@ -103,6 +171,15 @@ def get_cot_prompt(question, options):
 
 
 def get_synthesized_report_prompt(question_analyses, option_analyses):
+    """_summary_: 生成 prompt => 引导 llm 基于各个医学专家的分析综合出一个关键知识点和总体分析 => synthesized report 的格式。 
+
+    Args:
+        - question_analyses: (_type_): _description_
+        - option_analyses: (_type_): _description_
+
+    Returns:
+        - : (_type_): _description_
+    """
     synthesizer = "You are a medical decision maker who excels at summarizing and synthesizing based on multiple experts from various domain experts."
 
     syn_report_format = f"Key Knowledge: [extracted key knowledge] \n" \
@@ -121,6 +198,15 @@ def get_synthesized_report_prompt(question_analyses, option_analyses):
 
 
 def get_consensus_prompt(domain, syn_report):
+    """_summary_: 生成 prompt => 引导 experts 对 consensus opinion 投票 yes/no 并且给出他们的意见。
+
+    Args:
+        - domain: (_type_): _description_
+        - syn_report: (_type_): _description_
+
+    Returns:
+        - : (_type_): _description_
+    """
     voter = f"You are a medical expert specialized in the {domain} domain."
     cons_prompt = f"Here is a medical report: {syn_report} \n"\
         f"As a medical expert specialized in {domain}, please carefully read the report and decide whether your opinions are consistent with this report." \
@@ -129,6 +215,15 @@ def get_consensus_prompt(domain, syn_report):
 
 
 def get_consensus_opinion_prompt(domain, syn_report):
+    """_summary_: 生成 prompt => 引导 experts 对 consensus opinion 投票 yes/no 并且给出他们的意见。
+
+    Args:
+        - domain: (_type_): _description_
+        - syn_report: (_type_): _description_
+
+    Returns:
+        - : (_type_): _description_
+    """
     opinion_prompt = f"Here is a medical report: {syn_report} \n"\
         f"As a medical expert specialized in {domain}, please make full use of your expertise to propose revisions to this report." \
         f"You should output in exactly the same format as '''Revisions: [proposed revision advice] '''"
@@ -138,6 +233,15 @@ def get_consensus_opinion_prompt(domain, syn_report):
 #revision_prompt = get_revision_prompt(revision_advice)
 
 def get_revision_prompt(syn_report, revision_advice):
+    """_summary_: 生成 prompt => 引导 llm 用于整合所有专家的修订建议，并输出修订后的分析。
+
+    Args:
+        - syn_report: (_type_): _description_
+        - revision_advice: (_type_): _description_
+
+    Returns:
+        - : (_type_): _description_
+    """
     revision_prompt = f"Here is the original report: {syn_report}\n\n"
     for domain, advice in revision_advice.items():
         revision_prompt += f"Here is advice from a medical expert specialized in {domain}: {advice}.\n"
